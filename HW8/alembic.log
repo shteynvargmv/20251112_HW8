@@ -1,0 +1,5 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 4e95d9fb8422, init
+C:\Users\ACER\Documents\PYTHON_учеба\20251112 Работа с БД\HW8\venv\src\.env
+postgresql+psycopg2://postgresuser:postgrespassword@localhost/pythondb

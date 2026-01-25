@@ -1,0 +1,11 @@
+alembic==1.18.1
+decorator==5.2.1
+factory-boy==2.11.1
+Faker==40.1.2
+prompt_toolkit==3.0.52
+psycopg2==2.9.11
+pytest==9.0.2
+redis==7.1.0
+ruff==0.14.14
+SQLAlchemy==2.0.46
+

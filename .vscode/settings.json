@@ -1,0 +1,31 @@
+{
+    "python.testing.pytestArgs": [
+        "HW8"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+} // {
+//     "python.testing.pytestArgs": [
+//         "tests",
+//         "--rootdir=.",
+//         "-v",
+//         "--disable-warnings",
+//         "--no-header"
+//     ],
+//     "python.testing.unittestEnabled": false,
+//     "python.testing.pytestEnabled": true,
+//     "python.testing.cwd": "${workspaceFolder}",
+//     "python.testing.autoTestDiscoverOnSaveEnabled": false,
+//     "python.analysis.extraPaths": [
+//         "src",
+//         "."
+//     ],
+//     "python.terminal.executeInFileDir": true
+// }
+// {
+//     "python.testing.pytestArgs": [
+//         "HW8"
+//     ],
+//     "python.testing.unittestEnabled": false,
+//     "python.testing.pytestEnabled": true
+// }
