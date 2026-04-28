@@ -1,8 +1,11 @@
-
+"""DTO для рейсов."""
 from datetime import datetime
 
+
 class SflightDTO:
+    """DTO для рейсов."""
     def __init__(self,row):
+        """Конструктор."""
         self.mandt = row.mandt
         self.carrid = row.carrid
         self.connid = row.connid
@@ -13,7 +16,9 @@ class SflightDTO:
             self.fldate = row.fldate
 
     def __str__(self):
-        return f"{self.mandt} {self.carrid} {self.connid} {self.fldate}"
+        """Вывод."""
+        return f'{self.mandt} {self.carrid} {self.connid} {self.fldate}'
     
     def __repr__(self):
+        """Представление."""
         return self.__str__()

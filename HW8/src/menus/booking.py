@@ -5,6 +5,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 import re
 from datetime import datetime
+from typing import List
 
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import WordCompleter
@@ -35,8 +36,8 @@ class Booking:
             print('')
             flight = self.flight_choice()  
             if flight and len(flight) > 0:   
-                success = self.booking(flight)
-                if success:
+                res = self.booking(flight)
+                if len(res) > 0:
                     print(f'Успешно забронировано: {flight}')
                     success = bool(not is_quit('Q'))
             else:
@@ -148,36 +149,39 @@ class Booking:
         FlyView(fly_dtos).display()     
         return self.input_flight(fly_dtos)
     
-    def booking(self, flight):
+    def booking(self, flight, pass_count = None) -> List[int]:
         """Бронирование."""
         if flight and len(flight) == 17: 
-            pass_count = 0
+            res = []
             cache = self.service.get_cache_spfli_sflight()
             dtos = list(filter( lambda dto: dto.carrcode == flight[0:2] and dto.connid == flight[2:6] and dto.fldate == flight[7:17], 
                                 cache))
             if len(dtos) > 0:
                 dto = dtos[0]
                 seatsfree = int(dto.seatsmax) - int(dto.seatsocc)
-                pass_count = self.input_pass_count(seatsfree)
+                if not pass_count:
+                    pass_count = 0
+                    pass_count = self.input_pass_count(seatsfree)
                 
                 if pass_count > 0:
                     dto.seatsocc = int(dto.seatsocc) + pass_count
                     self.service.update_sflight(dto)
-                    self.service.update_sbook(dto,pass_count)
+                    res = self.service.update_sbook(dto,pass_count)
+
                     for c in cache: 
                         if c.mandt == dto.mandt and c.carrid == dto.carrid and \
                             c.connid == dto.connid and c.fldate == dto.fldate:
                             c = dto
                         c = dto   
                     self.service.set_cache_spfli_sflight(cache)
-                    return True
+                    return res
                 else:
                     while True:
                         print(f'Для бронирования доступно только {seatsfree}.')
                         des = prompt('Выбрать другой рейс? (Y/N):')   
                         if not is_quit(des):
                             if des.upper() == 'Y':
-                                return False
+                                return res
                             elif des.upper() == 'N':  
                                 is_quit('Q') 
 

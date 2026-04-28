@@ -123,8 +123,42 @@ class FlyRepository:
                     INNER JOIN sairport as at
                         ON spfli.mandt = at.mandt AND spfli.airpto = at.id   
                     INNER JOIN scarr 
-                        ON spfli.mandt = scarr.mandt AND spfli.carrid = scarr.carrid                    
+                        ON spfli.mandt = scarr.mandt AND spfli.carrid = scarr.carrid               
                     WHERE {where}""")  # noqa: S608
+            result = self.session.execute(stmt)
+            return result
+        else:
+            stmt = text("""
+                SELECT
+                    sflight.carrid,
+                    scarr.carrcode,
+                    sflight.connid, 
+                    spfli.countryfr,
+                    spfli.cityfrom,
+                    spfli.airpfrom,
+                    af.name as airpfrom_name,
+                    spfli.countryto,
+                    spfli.cityto,
+                    spfli.airpto,
+                    at.name as airpto_name,
+                    spfli.fltime, 
+                    sflight.fldate,
+                    sflight.price,
+                    sflight.currency,
+                    sflight.planetype,
+                    sflight.seatsmax,
+                    sflight.seatsocc, 
+                    sflight.mandt                       
+                    FROM spfli
+                    INNER JOIN sflight 
+                        ON spfli.mandt = sflight.mandt AND spfli.carrid = sflight.carrid AND spfli.connid = sflight.connid  
+                    INNER JOIN sairport as af
+                        ON spfli.mandt = af.mandt AND spfli.airpfrom = af.id    
+                    INNER JOIN sairport as at
+                        ON spfli.mandt = at.mandt AND spfli.airpto = at.id   
+                    INNER JOIN scarr 
+                        ON spfli.mandt = scarr.mandt AND spfli.carrid = scarr.carrid               
+                """)  # noqa: S608
             result = self.session.execute(stmt)
             return result
             
@@ -149,7 +183,84 @@ class FlyRepository:
                         ON sbook.mandt = scustom.mandt AND sbook.customid = scustom.phone                       
                     WHERE {where}""")  # noqa: S608
             result = self.session.execute(stmt)
+            return result.fetchall()
+        
+    def select_sbook_ext(self, fields, values):
+        """Получить данные из sbook."""
+        where = self.form_where(fields, values)
+        if where != '':
+            stmt = text(f"""
+                SELECT
+                    sbook.mandt,
+                    sbook.carrid,
+                    scarr.carrcode,
+                    scarr.carrname,
+                    spfli.cityfrom,
+                    spfli.airpfrom,
+                    af.name as airpfromname, 
+                    spfli.cityto,
+                    spfli.airpto,
+                    at.name as airptoname,
+                    sbook.connid,
+                    sbook.fldate,
+                    spfli.fltime,
+                    sflight.price,
+                    sflight.currency,
+                    sbook.bookid,
+                    sbook.customid,
+                    scustom.name  
+                    FROM sbook
+                    INNER JOIN scarr 
+                        ON sbook.mandt = scarr.mandt AND sbook.carrid = scarr.carrid 
+                    INNER JOIN spfli
+                        ON scarr.mandt = spfli.mandt AND scarr.carrid = spfli.carrid
+                    INNER JOIN sflight
+                        ON spfli.mandt = sflight.mandt AND spfli.carrid = sflight.carrid AND spfli.connid = sflight.connid
+                    INNER JOIN scustom
+                        ON sbook.mandt = scustom.mandt AND sbook.customid = scustom.phone   
+                    INNER JOIN sairport as af
+                        ON spfli.mandt = af.mandt AND spfli.airpfrom = af.id    
+                    INNER JOIN sairport as at
+                        ON spfli.mandt = at.mandt AND spfli.airpto = at.id                      
+                    WHERE {where}""")  # noqa: S608
+            result = self.session.execute(stmt)
             return result    
+        else:
+            stmt = text("""
+                SELECT
+                    sbook.mandt,
+                    sbook.carrid,
+                    scarr.carrcode,
+                    scarr.carrname,
+                    spfli.cityfrom,
+                    spfli.airpfrom,
+                    af.name as airpfromname, 
+                    spfli.cityto,
+                    spfli.airpto,
+                    at.name as airptoname,
+                    sbook.connid,
+                    sbook.fldate,
+                    spfli.fltime,
+                    sflight.price,
+                    sflight.currency,
+                    sbook.bookid,
+                    sbook.customid,
+                    scustom.name  
+                    FROM sbook
+                    INNER JOIN scarr 
+                        ON sbook.mandt = scarr.mandt AND sbook.carrid = scarr.carrid 
+                    INNER JOIN spfli
+                        ON scarr.mandt = spfli.mandt AND scarr.carrid = spfli.carrid
+                    INNER JOIN sflight
+                        ON spfli.mandt = sflight.mandt AND spfli.carrid = sflight.carrid AND spfli.connid = sflight.connid
+                    INNER JOIN scustom
+                        ON sbook.mandt = scustom.mandt AND sbook.customid = scustom.phone   
+                    INNER JOIN sairport as af
+                        ON spfli.mandt = af.mandt AND spfli.airpfrom = af.id    
+                    INNER JOIN sairport as at
+                        ON spfli.mandt = at.mandt AND spfli.airpto = at.id""")  # noqa: S608
+            result = self.session.execute(stmt)
+            return result 
             
     def get_max_bookid_sbook(self):   
         """Максимальный bookid в sbook."""   
@@ -174,4 +285,12 @@ class FlyRepository:
         self.session.close()
         self.conn.close()
         self.engine.dispose()
+
+    def del_sbook(self,bookid:int):
+        """Удалить данные из sbook."""
+        stmt = text(f"""DELETE FROM sbook                     
+                WHERE bookid = {bookid}""")  # noqa: S608
+        result = self.session.execute(stmt)
+        self.session.commit() 
+        return result   
 

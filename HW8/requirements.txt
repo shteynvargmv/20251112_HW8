@@ -9,4 +9,14 @@ pytest==9.0.2
 redis==7.1.0
 ruff==0.14.14
 SQLAlchemy==2.0.46
+uvicorn==0.46.0
+fastapi==0.136.1
+fastapi-cli==0.0.24
+fastapi-cloud-cli==0.17.0
+pydantic==2.13.3
+pydantic-extra-types==2.11.1
+pydantic-settings==2.14.0
+pydantic_core==2.46.3
+authx==1.5.2
+PyJWT==2.12.1
 

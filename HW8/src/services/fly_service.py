@@ -1,6 +1,7 @@
 """Сервис."""
 import sys
 from pathlib import Path
+from typing import List
 
 sys.path.append(str(Path(__file__).parent.parent))
 from types import SimpleNamespace
@@ -11,6 +12,7 @@ from repositories.fly_repository import FlyRepository
 sys.path.append(str(Path(__file__).parent / 'dto'))
 from db.models import SBook, SFlight
 from dto.sbook_dto import SBookDTO
+from dto.sbook_dto_ext import SBookDTOExt
 from dto.sflight_dto import SflightDTO
 from dto.spfli_sflight_dto import SpfliSflightDTO
 
@@ -30,7 +32,7 @@ class FlyService:
         cache_clear(spfli_sflight_cache_key, sflight_cache_key)
 
     def set_customid(self, customid):
-        """Получить customid."""
+        """Установить customid."""
         self.customid = customid
 
     def generate(self,count):
@@ -50,6 +52,11 @@ class FlyService:
         result = self.repository.select_scustom(fields, values)
         if result:
             self.customid = result[0].phone
+        return result
+    
+    def get_sbook(self, fields, values):
+        """Получить записи бронирований."""
+        result = self.repository.select_sbook(fields, values)
         return result
     
     def add_scustom(self, scustom):
@@ -87,27 +94,36 @@ class FlyService:
     
     def get_spfli_sflight(self,fields,values):
         """Получить записи из spfli + sflight."""
-        #Сначала посмотрим, загружены ли такие в кэш
-        cache_json = cache_pull(spfli_sflight_cache_key)
-        cache=[]
-        dtos=[]        
-        for row in cache_json:
-            data = SimpleNamespace(**row) 
-            dto = SpfliSflightDTO(data)
-            cache.append(dto)
-            all_match = all( getattr(dto, fields[i].split('.')[1]) == values[i] for i in range(len(fields)))          
-            if all_match:
-                dtos.append(dto)
-        if len(dtos) > 0:
-            return dtos
-        else:
-            #Если нет, то возьмем из БД
-            result = list(self.repository.select_spfli_sflight(fields,values))        
+        if len(fields) == 0:
+            dtos=[] 
+            result = list(self.repository.select_spfli_sflight(fields,values))       
             for row in result:
                 dto = SpfliSflightDTO(row._mapping)
                 dtos.append(dto)         
-            cache_push(spfli_sflight_cache_key,dtos+cache,3600) 
-            return dtos   
+            cache_push(spfli_sflight_cache_key,dtos,3600) 
+            return dtos  
+        else: 
+            #Сначала посмотрим, загружены ли такие в кэш
+            cache_json = cache_pull(spfli_sflight_cache_key)
+            cache=[]
+            dtos=[]        
+            for row in cache_json:
+                data = SimpleNamespace(**row) 
+                dto = SpfliSflightDTO(data)
+                cache.append(dto)
+                all_match = all( getattr(dto, fields[i].split('.')[1]) == values[i] for i in range(len(fields))) 
+                if all_match:
+                    dtos.append(dto)
+            if len(dtos) > 0:
+                return dtos
+            else:
+                #Если нет, то возьмем из БД
+                result = list(self.repository.select_spfli_sflight(fields,values))       
+                for row in result:
+                    dto = SpfliSflightDTO(row._mapping)
+                    dtos.append(dto)         
+                cache_push(spfli_sflight_cache_key,dtos+cache,3600) 
+                return dtos   
     
     def get_cache_spfli_sflight(self):
         """Получить записи из кэша spfli + sflight."""
@@ -136,9 +152,10 @@ class FlyService:
             seatsocc = fly_dto.seatsocc)
         self.repository.update_sflight(sflight)
 
-    def update_sbook(self,fly_dto:SBookDTO, pass_count):
+    def update_sbook(self,fly_dto:SBookDTO, pass_count)->List[int]:
         """Обновить sbook."""
         bookid = self.repository.get_max_bookid_sbook()
+        res = []
         for _ in range(pass_count):
             bookid += 1
             sbook = SBook(
@@ -148,6 +165,8 @@ class FlyService:
                 customid = self.customid,
                 bookid = bookid)
             self.repository.update_sbook(sbook)
+            res.append(bookid)
+        return res
 
     def get_bookings(self):
         """Получить данные из sbook."""
@@ -158,6 +177,23 @@ class FlyService:
                 dto = SBookDTO(row._mapping)
                 sbook_dtos.append(dto)  
             return sbook_dtos
+        
+    def get_bookings_ext(self, bookid:str=None):
+        """Получить все данные из sbook."""
+        if bookid:
+            result = list(self.repository.select_sbook_ext(('bookid',),(bookid,)))
+        else:
+            result = list(self.repository.select_sbook_ext((),()))
+        sbook_dtos = []
+        for row in result:
+            dto = SBookDTOExt(row._mapping)
+            sbook_dtos.append(dto)
+        return sbook_dtos
+    
+    def del_sbook(self,bookid:int):
+        """Удалить из sbook."""
+        return self.repository.del_sbook(bookid)
+
 
     # def print_all(self):
     #     print('------------------------------------')

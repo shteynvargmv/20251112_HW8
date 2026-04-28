@@ -1,5 +1,10 @@
+"""DTO для рейсов и расписаний."""
+
+
 class SpfliSflightDTO:
+    """DTO для рейсов и расписаний."""
     def __init__(self,row):
+        """Конструктор."""
         self.mandt = row.mandt
         self.carrid = row.carrid
         self.carrcode = row.carrcode
@@ -22,10 +27,12 @@ class SpfliSflightDTO:
         self.seatsfree = int(row.seatsmax) - int(row.seatsocc)
 
     def __str__(self):
-        return f"{self.mandt} {self.carrid} {self.carrcode} {self.connid} {self.countryfr} {self.cityfrom} {self.airpfrom} \
+        """Вывод."""
+        return f'{self.mandt} {self.carrid} {self.carrcode} {self.connid} {self.countryfr} {self.cityfrom} {self.airpfrom} \
                 {self.airpfrom_name} {self.countryto} {self.cityto} {self.airpto} {self.airpto_name} {self.fltime} \
-                {self.fldate} {self.price} {self.currency} {self.planetype} {self.seatsmax} {self.seatsocc}"
+                {self.fldate} {self.price} {self.currency} {self.planetype} {self.seatsmax} {self.seatsocc}'
     
     def __repr__(self):
+        """Представление."""
         return self.__str__()
 

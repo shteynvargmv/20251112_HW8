@@ -21,6 +21,7 @@ class SCustom(Base):
     mandt: Mapped[str] = mapped_column(String(3), primary_key=True)
     phone: Mapped[str] = mapped_column(String(20),primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
+    password: Mapped[str] = mapped_column(String(20), nullable=False)
 
     #1:M
     sbook_customids: Mapped['SBook'] = relationship( 
@@ -30,15 +31,16 @@ class SCustom(Base):
         viewonly=True
     )
 
-    def __init__(self, phone, name):
+    def __init__(self, phone, name, password):
         """Конструктор."""
         self.mandt = mandt
         self.phone = phone
         self.name = name
+        self.password = password
 
     def __str__(self):
         """Вывод."""
-        return f'{self.mandt} {self.name} ({self.phone})'
+        return f'{self.mandt} {self.name} ({self.phone}) {self.password}'
 
 class SAirport(Base):
     """Аэропорты."""
